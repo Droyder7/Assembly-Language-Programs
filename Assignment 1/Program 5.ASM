@@ -1,0 +1,94 @@
+;Program which will ask for a number and the number will be taken from keyboard. Print the number in decimal, binary and hexadecimal format
+
+.MODEL SMALL
+.STACK 100H
+.DATA
+
+MSG1 DB "ENTER THE NUMBER $:"
+D DB 10,2,16,"$"
+MSG2 DB " ",13,10,"$" 
+
+.CODE
+MAIN PROC
+
+	MOV AX,@DATA
+	MOV DS,AX
+
+	LEA DX,MSG1
+	MOV AH,09H
+	INT 21H
+	MOV BL,0
+	MOV CH,10
+
+LOOP1:
+	MOV AH,01H
+	INT 21H
+	CMP AL,13
+	JE LOOP2
+	SUB AL,30H
+	MOV CL,AL
+	MOV AL,BL
+	MUL CH
+	ADD AL,CL
+	MOV BL,AL
+	JMP LOOP1
+
+LOOP2:
+	MOV CL,BL
+	LEA SI,D
+	MOV CH,0
+
+INI: 
+	MOV AL,CL
+	MOV DH,0
+	MOV DL,24H
+	PUSH DX
+	MOV BL,[SI]
+
+L1:
+	CMP AL,0
+	JE L2
+	MOV AH,0
+	DIV BL
+	MOV DL,AH
+	MOV DH,0
+	PUSH DX
+	JMP L1
+
+L2:
+	POP DX
+	CMP DL,24H
+	JE L3
+	CMP DL,9
+	JG HEX
+	ADD DL,30H
+	MOV AH,02H
+	INT 21H
+	JMP L2
+
+HEX:
+	ADD DL,55
+	MOV AH,02H
+	INT 21H
+	JMP L2
+
+
+L3:
+	LEA DX,MSG2
+	MOV AH,09H
+	INT 21H
+	INC BH
+	MOV CH,3
+	CMP BH,CH
+	JE EXIT
+	INC SI
+	JMP INI
+
+EXIT:
+	MOV AH,4CH
+	INT 21H
+ 
+MAIN ENDP
+END MAIN
+
+
